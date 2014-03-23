@@ -84,6 +84,7 @@ sub store_path {
 }
 
 1;
+
 __END__
 
 =head1 NAME
@@ -212,5 +213,32 @@ from the front.
 The store lives under 'hidden' directories called .VCSLite or in the case of
 VMS _VCSLITE (dots are not permitted in the directory name syntax). 
 
+=head1 BUGS, PATCHES & FIXES
 
+There are no known bugs at the time of this release. However, if you spot a
+bug or are experiencing difficulties that are not explained within the POD
+documentation, please send an email to barbie@cpan.org or submit a bug to the
+RT system (see link below). However, it would help greatly if you are able to 
+pinpoint problems or even supply a patch.
 
+http://rt.cpan.org/Public/Dist/Display.html?Name=VCS-Lite-Repository
+
+Fixes are dependent upon their severity and my availability. Should a fix not
+be forthcoming, please feel free to (politely) remind me.
+
+=head1 AUTHOR
+
+  Original Author: Ivor Williams (RIP)          2002-2009
+  Current Maintainer: Barbie <barbie@cpan.org>  2014
+
+=head1 COPYRIGHT
+
+  Copyright (c) Ivor Williams, 2002-2009
+  Copyright (c) Barbie,        2014
+
+=head1 LICENCE
+
+This distribution is free software; you can redistribute it and/or
+modify it under the Artistic Licence v2.
+
+=cut

@@ -141,6 +141,7 @@ sub update {
 }
 
 1; #this line is important and will help the module return a true value
+
 __END__
 
 
@@ -228,28 +229,36 @@ If no gen2 is specified, diff uses the file file2 outside the repository
 (file1 if no file2 is specified). If you want diff to use the latest
 generation of file2 instead, specify gen2 as 'latest'.
 
-=head1 BUGS
-
-Please report bugs to rt.cpan.org
-
-=head1 SUPPORT
-
-
-
-=head1 AUTHOR
-
-	I. Williams
-	
-=head1 COPYRIGHT
-
-This program is free software; you can redistribute
-it and/or modify it under the same terms as Perl itself.
-
-The full text of the license can be found in the
-LICENSE file included with this module.
-
-
 =head1 SEE ALSO
 
 perl(1).
 
+=head1 BUGS, PATCHES & FIXES
+
+There are no known bugs at the time of this release. However, if you spot a
+bug or are experiencing difficulties that are not explained within the POD
+documentation, please send an email to barbie@cpan.org or submit a bug to the
+RT system (see link below). However, it would help greatly if you are able to 
+pinpoint problems or even supply a patch.
+
+http://rt.cpan.org/Public/Dist/Display.html?Name=VCS-Lite-Repository
+
+Fixes are dependent upon their severity and my availability. Should a fix not
+be forthcoming, please feel free to (politely) remind me.
+
+=head1 AUTHOR
+
+  Original Author: Ivor Williams (RIP)          2002-2009
+  Current Maintainer: Barbie <barbie@cpan.org>  2014
+
+=head1 COPYRIGHT
+
+  Copyright (c) Ivor Williams, 2002-2009
+  Copyright (c) Barbie,        2014
+
+=head1 LICENCE
+
+This distribution is free software; you can redistribute it and/or
+modify it under the Artistic Licence v2.
+
+=cut
