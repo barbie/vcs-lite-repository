@@ -1,20 +1,23 @@
 package VCS::Lite::Store;
 
-use 5.006;
 use strict;
 use warnings;
+
+our $VERSION = '0.09';
+
+#----------------------------------------------------------------------------
 
 use Carp;
 use File::Spec::Functions qw(:ALL);
 use Time::Piece;
 
-our $VERSION = '0.02';
 our $hidden_repos_dir = '.VCSLite';
 $hidden_repos_dir = '_VCSLITE' if $^O =~ /vms/i;
 
+#----------------------------------------------------------------------------
+
 sub new {
     my ($pkg, %par) = @_;
-
     bless \%par,$pkg;
 }
 
@@ -44,11 +47,10 @@ sub create {
     my ($store_dir, $store_file) = $self->store_path($path);
 
     if (!-d $store_dir) {
-	mkdir $store_dir or croak "Failed to make repository dir $store_dir";
+    	mkdir $store_dir or croak "Failed to make repository dir $store_dir";
     }
     
-    my $creator = $self->can('user') ? $self->user : 
-    		$proto->user or croak "Username not specified"; 
+    my $creator = $self->can('user') ? $self->user : $proto->user or croak "Username not specified"; 
 
     @{$proto}{qw/store creator created/} = ($self,$creator,localtime->datetime);
     my $class = ref $proto;
@@ -62,9 +64,10 @@ sub store_path {
     
     my ($vol,$dir,$fil) = splitpath(rel2abs($path));
     if ($fil && -d $path) {      # Because of the way splitpath works on Unix
-	$dir = catdir($dir,$fil);
-	$fil = '';
+        $dir = catdir($dir,$fil);
+        $fil = '';
     }
+
     if (ref $self) {
         my ($hvol,$hdir) = splitpath($self->{home});
         croak "Wrong volume in attempt to access store for $path" 
@@ -76,10 +79,10 @@ sub store_path {
         }
         ($vol,my $rdir) = splitpath($self->{root});
         $dir = catdir($rdir,@dir);
-    }
-    else {
+    } else {
         $dir = catdir($dir,$hidden_repos_dir);
     }
+
     ($dir, catpath($vol, $dir, $self->repos_name($fil,$ext)));
 }
 

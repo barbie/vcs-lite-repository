@@ -1,25 +1,31 @@
-
 package VCS::Lite::Shell;
-use strict;
 
-BEGIN {
-	use Exporter ();
-	use vars qw ($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
-	$VERSION     = 0.01;
-	@ISA         = qw (Exporter);
-	#Give a hoot don't pollute, do not export more than needed by default
-	@EXPORT      = qw ();
-	@EXPORT_OK   = qw (store add remove list check_in check_out 
-			commit update fetch diff);
-	%EXPORT_TAGS = ( local => [qw/store add remove check_in fetch diff/],
-			all => [qw/store add remove list check_in fetch diff
-			check_out commit update/]);
-}
+use strict;
+use warnings;
+
+our $VERSION = '0.09';
+
+#----------------------------------------------------------------------------
+
+use vars qw (@ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
+
+use Exporter ();
+@ISA         = qw (Exporter);
+#Give a hoot don't pollute, do not export more than needed by default
+@EXPORT      = qw ();
+@EXPORT_OK   = qw (store add remove list check_in check_out commit update fetch diff);
+%EXPORT_TAGS = ( 
+    local   => [qw/store add remove check_in fetch diff/],
+	all     => [qw/store add remove list check_in fetch diff check_out commit update/]
+);
 
 use Params::Validate qw(:all);
 use VCS::Lite::Repository;
 use Cwd;
+
 our %store_list;
+
+#----------------------------------------------------------------------------
 
 sub store {
     my ($which, $type, @att) = @_;
@@ -27,8 +33,8 @@ sub store {
     $which ||= 'current';
     $type = 'VCS::Lite::Store::'.$type unless $type =~ /\:\:/;
     if ($type =~ /^\w+(:?\:\:\w+)*$/) {
-	eval "require $type";
-	carp $@ if $@;
+        eval "require $type";
+        carp $@ if $@;
     }
 
     $store_list{$which} = @att ? $type->new(@att) : $type;
@@ -41,8 +47,7 @@ sub repository {
     
     store($store, VCS::Lite::Repository->default_store)
     	unless exists $store_list{$store};
-    VCS::Lite::Repository->new( $dir, 
-    		store=>$store_list{$store} );
+    VCS::Lite::Repository->new( $dir, store=>$store_list{$store} );
 }
 
 sub member {
@@ -106,10 +111,10 @@ sub diff {
     if (exists $par{gen2}) {
         $lite2 = member('current',$par{file2})
     	  ->fetch(($par{gen1} eq 'latest') ? () : (generation => $par{gen2}));
-    }
-    else {
+    } else {
         $lite2 = VCS::Lite->new($par{file2});
     }
+
     my $d = $lite1->delta($lite2) or return '';
     $d->udiff;
 }
@@ -131,12 +136,10 @@ sub check_in {
 }
 
 sub commit {
-
     repository('current')->commit();
 }
 
 sub update {
-
     repository('current')->update();
 }
 

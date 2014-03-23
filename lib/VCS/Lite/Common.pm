@@ -1,14 +1,18 @@
 package VCS::Lite::Common;
 
-use 5.006;
 use strict;
 use warnings;
 
-our $VERSION = '0.04';
+our $VERSION = '0.09';
+
+#----------------------------------------------------------------------------
+
 our $username = $ENV{VCSLITE_USER} || $ENV{USER};
 our $default_store = 'Storable';
 
 use File::Spec::Functions qw(splitpath splitdir);
+
+#----------------------------------------------------------------------------
 
 sub path {
     my $self = shift;
@@ -18,14 +22,13 @@ sub path {
     my $newpath = shift;
     
     if ($self->{path} ne $newpath) {
-	$self->{path} = $newpath;
-	$self->save;
+        $self->{path} = $newpath;
+        $self->save;
     }
 }
 
 sub name {
     my $self = shift;
-
     my ($vol, $dir, $fil) = splitpath($self->path);
 
     $fil || (splitdir $dir)[-1];
@@ -62,7 +65,6 @@ sub up_generation {
     my ($self,$gen) = @_;
 
     $gen =~ s/\.0$// or $gen =~ s/([1-9]\d*)$/$1-1/e or return undef;
-
     $gen;
 }
 

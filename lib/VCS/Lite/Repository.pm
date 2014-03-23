@@ -4,6 +4,10 @@ use 5.006;
 use strict;
 use warnings;
 
+our $VERSION = '0.09';
+
+#----------------------------------------------------------------------------
+
 use Carp;
 use File::Spec::Functions qw(:ALL !path);
 use Time::Piece;
@@ -11,9 +15,9 @@ use VCS::Lite::Element;
 use Params::Validate qw(:all);
 use Cwd qw(abs_path);
 
-our $VERSION = '0.09';
-
 use base qw(VCS::Lite::Common);
+
+#----------------------------------------------------------------------------
 
 sub new {
     my $pkg = shift;
@@ -39,22 +43,21 @@ sub new {
     		contents => []},$pkg;
     my $store_pkg;
     if (ref $args{store}) {
-	$store_pkg = $args{store};
-    }
-    else {
-	$store_pkg = ($args{store} =~ /\:\:/) ? $args{store} : 
-		"VCS::Lite::Store::$args{store}";
-	eval "require $store_pkg"; 
-	warn "Failed to require $store_pkg\n$@" if $@;
+    	$store_pkg = $args{store};
+    } else {
+        $store_pkg = ($args{store} =~ /\:\:/) ? $args{store} : "VCS::Lite::Store::$args{store}";
+        eval "require $store_pkg"; 
+        warn "Failed to require $store_pkg\n$@" if $@;
     }
     
     my $repos = $store_pkg->retrieve_or_create($proto);
     if (exists $repos->{elements}) {
         $repos->_mumble("Upgrading repository $abspath from 0.02 to $VERSION");
-	$repos->{contents} ||= $repos->{elements};
-	delete $repos->{elements};
-	$repos->save;
+        $repos->{contents} ||= $repos->{elements};
+        delete $repos->{elements};
+        $repos->save;
     }
+
     $repos->path($abspath);
     $repos->{author} = $repos->user;
     $repos->{verbose} = $verbose;
@@ -77,20 +80,20 @@ sub add {
         mkdir $absfile unless -d $absfile;
         $remainder = @dirs ? catpath($vol,catdir(@dirs),$fil) : $fil;
         $file = $top;
-    }
-    else {
+    } else {
         $absfile = catfile($path,$fil);
     }
 
     unless ((catdir($file) eq updir) ||
            (catdir($file) eq curdir) ||
            grep {$file eq $_} @{$self->{contents}}) {
-	$self->_mumble("Add $file to $path");
-	my @newlist = sort(@{$self->{contents}},$file);
-	$self->{transactions} ||= [];
-	my @trans = (@{$self->{transactions}}, ['add',$file]);
-	$self->_update_ctrl( contents => \@newlist,
-			transactions => \@trans);
+
+        $self->_mumble("Add $file to $path");
+        
+        my @newlist = sort(@{$self->{contents}},$file);
+        $self->{transactions} ||= [];
+        my @trans = (@{$self->{transactions}}, ['add',$file]);
+        $self->_update_ctrl( contents => \@newlist, transactions => \@trans);
     }
 
     my $newobj = (-d $absfile) ? VCS::Lite::Repository->new($absfile,
@@ -120,19 +123,18 @@ sub remove {
     my $doit = 0;
 
     for (@{$self->{contents}}) {
-	if ($file eq $_) {
-	    $doit++;
-	} else {
-	    push @contents,$_;
-	}
+        if ($file eq $_) {
+            $doit++;
+        } else {
+            push @contents,$_;
+        }
     }
     return undef unless $doit;
 
     $self->_mumble("Remove $file from " . $self->path);
     $self->{transactions} ||= [];
     my @trans = (@{$self->{transactions}}, ['remove',$file]);
-    $self->_update_ctrl( contents => \@contents,
-			transactions => \@trans);
+    $self->_update_ctrl( contents => \@contents, transactions => \@trans);
     1;
 }
 
@@ -224,29 +226,31 @@ sub check_in {
     $self->_mumble("Checking in " . $self->path);
     if (($self->{transactions} && @{$self->{transactions}}) 
 		|| $args{check_in_anyway}) {
+
         $self->_mumble("Updating directory changes");
-	my $newgen = $args{generation} || $self->latest;
-	$newgen =~ s/(\d+)$/$1+1/e;
-	$self->{generation} ||= {};
-	my %gen = %{$self->{generation}};
-	$gen{$newgen} = {
-		author => $self->user,
-		description => $args{description},
-		updated => localtime->datetime,
-		transactions => $self->{transactions},
-		contents => $self->{contents},
-	};
 
-	$self->{latest} ||= {};
-	my %lat = %{$self->{latest}};
-	$newgen =~ /(\d+\.)*\d+$/;
-	my $base = $1 || '';
-	$lat{$base}=$newgen;
-	delete $self->{transactions};
+        my $newgen = $args{generation} || $self->latest;
+        $newgen =~ s/(\d+)$/$1+1/e;
+        $self->{generation} ||= {};
+        my %gen = %{$self->{generation}};
+        $gen{$newgen} = {
+            author => $self->user,
+            description => $args{description},
+            updated => localtime->datetime,
+            transactions => $self->{transactions},
+            contents => $self->{contents},
+        };
 
-	$self->_update_ctrl( generation => \%gen, 
-    			latest => \%lat);
+        $self->{latest} ||= {};
+        my %lat = %{$self->{latest}};
+        $newgen =~ /(\d+\.)*\d+$/;
+        my $base = $1 || '';
+        $lat{$base}=$newgen;
+        delete $self->{transactions};
+
+        $self->_update_ctrl( generation => \%gen, latest => \%lat);
     }
+
     $self->traverse('check_in', params => [%args]);
 }
 
@@ -293,9 +297,7 @@ sub update {
     my $merged = $orig->merge($origplus,$chg);
     $parele->_apply($self,$chg->delta($merged));
 
-    $self->_update_ctrl(baseline => $self->latest,
-        parent_baseline => $parlat);
-
+    $self->_update_ctrl(baseline => $self->latest, parent_baseline => $parlat);
     
     $self->traverse('update', params => $parent);
 }
@@ -310,18 +312,20 @@ sub fetch {
     my $gen = exists($args{generation}) ? $args{generation} : $self->latest;
 
     if ($args{time}) {
-	my $latest_time = '';
-	my $branch = $args{generation} || '';
-	$branch .= '.' if $branch;
+        my $latest_time = '';
+        my $branch = $args{generation} || '';
+        $branch .= '.' if $branch;
 
-	for (keys %{$self->{generation}}) {
-            next unless /^$branch\d+$/;
-	    next if $self->{generation}{$_}{updated} > $args{time};
-	    ($latest_time,$gen) = ($self->{generation}{$_}{updated}, $_)
-		if $self->{generation}{$_}{updated} > $latest_time;
-	}
-	return undef unless $latest_time;
+        for (keys %{$self->{generation}}) {
+                next unless /^$branch\d+$/;
+            next if $self->{generation}{$_}{updated} > $args{time};
+            ($latest_time,$gen) = ($self->{generation}{$_}{updated}, $_)
+            if $self->{generation}{$_}{updated} > $latest_time;
+        }
+
+        return undef unless $latest_time;
     }
+
     return undef if $gen && $self->{generation} && !$self->{generation}{$gen};
 
     my $cont = $gen ? 
@@ -341,30 +345,30 @@ sub _apply {
     my $path = $dest->path;
     
     for (map {@$_} $delt->hunks) {
-	my ($ind,$lin,$val) = @$_;
-	if ($ind eq '-') {
-	    $dest->remove($val);
-	} elsif ($ind eq '+') {
-	    my $destname = catdir($path,$val);
-	    my $srcname = catdir($srcpath,$val); 
-	    # $srcname is false if catdir can't construct a dir, e.g.
-	    # if on VMS and $val contains a dot
-	    mkdir $destname if $srcname && -d $srcname;
-	    my $newobj = $dest->add($val);
-	    if (exists($dest->{parent}) && ($dest->{parent} eq $srcpath)) {
-	        $newobj->{parent} = catdir($dest->{parent},$val);
-	        $newobj->{parent_store} = $dest->{parent_store};
-	        $newobj->{parent_baseline} = 0;
-	        $newobj->save;
-	    }
-	    if (exists($src->{parent}) && ($src->{parent} eq $path)) {
-	        my $srcobj = $src->{store}->retrieve($srcname);
-	        $srcobj->{parent} = catdir($src->{parent},$val);
-	        $srcobj->{parent_store} = $src->{parent_store};
-	        $srcobj->{parent_baseline} = 0;
-	        $srcobj->save;
-	    }
-	}
+        my ($ind,$lin,$val) = @$_;
+        if ($ind eq '-') {
+            $dest->remove($val);
+        } elsif ($ind eq '+') {
+            my $destname = catdir($path,$val);
+            my $srcname = catdir($srcpath,$val); 
+            # $srcname is false if catdir can't construct a dir, e.g.
+            # if on VMS and $val contains a dot
+            mkdir $destname if $srcname && -d $srcname;
+            my $newobj = $dest->add($val);
+            if (exists($dest->{parent}) && ($dest->{parent} eq $srcpath)) {
+                $newobj->{parent} = catdir($dest->{parent},$val);
+                $newobj->{parent_store} = $dest->{parent_store};
+                $newobj->{parent_baseline} = 0;
+                $newobj->save;
+            }
+            if (exists($src->{parent}) && ($src->{parent} eq $path)) {
+                my $srcobj = $src->{store}->retrieve($srcname);
+                $srcobj->{parent} = catdir($src->{parent},$val);
+                $srcobj->{parent_store} = $src->{parent_store};
+                $srcobj->{parent_baseline} = 0;
+                $srcobj->save;
+            }
+        }
     }
 }
     
@@ -389,13 +393,15 @@ sub _update_ctrl {
 
     my $path = $args{path} || $self->{path};
     for (keys %args) {
-	$self->{$_} = $args{$_};
+    	$self->{$_} = $args{$_};
     }
 
     $self->{updated} = localtime->datetime;
     $self->save;
 }
+
 1;
+
 __END__
 
 =head1 NAME

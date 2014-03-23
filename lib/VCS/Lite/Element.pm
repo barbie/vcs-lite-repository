@@ -1,10 +1,11 @@
 package VCS::Lite::Element;
 
-use 5.006;
 use strict;
 use warnings;
 
-our $VERSION = '0.08';
+our $VERSION = '0.09';
+
+#----------------------------------------------------------------------------
 
 use File::Spec::Functions qw(splitpath catfile catdir catpath rel2abs);
 use Time::Piece;
@@ -14,6 +15,8 @@ use Params::Validate qw(:all);
 use Cwd qw(abs_path);
 
 use base qw(VCS::Lite::Common);
+
+#----------------------------------------------------------------------------
 
 sub new {
     my $pkg = shift;
@@ -33,35 +36,35 @@ sub new {
     my $store_pkg;
     if (ref $args{store}) {
         $store_pkg = $args{store};
-    }
-    else {
-	$store_pkg = ($args{store} =~ /\:\:/) ? $args{store} :
-		"VCS::Lite::Store::$args{store}";
-	eval "require $store_pkg"; 
-	warn "Failed to require $store_pkg\n$@" if $@;
+    } else {
+        $store_pkg = ($args{store} =~ /\:\:/) ? $args{store} : "VCS::Lite::Store::$args{store}";
+        eval "require $store_pkg"; 
+        warn "Failed to require $store_pkg\n$@" if $@;
     }
 
     my $ele = $store_pkg->retrieve($file);
     if ($ele) {
         $ele->path($file);
-	return $ele;
+    	return $ele;
     }
-    my $proto = bless {%args, 
-    		path => $file,
-		}, $pkg;
+    
+    my $proto = bless {
+        %args, 
+    	path => $file,
+	}, $pkg;
 
     $ele = $store_pkg->retrieve_or_create($proto);
 
     $ele->{path} = $file;
 
     if (!ref $lite) {
-	unless (-f $file) {
-	    open FIL, '>', $file or croak("Failed to create $file, $!");
-	    close FIL;
-	}
-	$lite = $ele->_slurp_lite($file);
+        unless (-f $file) {
+            open FIL, '>', $file or croak("Failed to create $file, $!");
+            close FIL;
+        }
+        $lite = $ele->_slurp_lite($file);
     } else {
-	$file = $lite->id;	# Not handled at present
+    	$file = $lite->id;	# Not handled at present
     }
     
     $ele->_assimilate($lite);
@@ -90,8 +93,9 @@ sub check_in {
     $gen{$newgen} = {
     	author => $self->user,
     	description => $args{description},
-	updated => localtime->datetime,
+	    updated => localtime->datetime,
     };
+
     $self->{latest} ||= {};
     my %lat = %{$self->{latest}};
     $newgen =~ /(\d+\.)*\d+$/;
@@ -126,38 +130,40 @@ sub fetch {
     
     if ($args{time}) {
         my $latest_time = '';
-	my $branch = $args{generation} || '';
-	$branch .= '.' if $branch;
-	for (keys %{$self->{generation}}) {
-	    next unless /^$branch\d+$/;
-	    next if $self->{generation}{$_}{updated} > $args{time};
-	    ($latest_time,$gen) = ($self->{generation}{$_}{updated}, $_)
-		if $self->{generation}{$_}{updated} > $latest_time;
-	}
-	return undef unless $latest_time;
+        my $branch = $args{generation} || '';
+        $branch .= '.' if $branch;
+        for (keys %{$self->{generation}}) {
+            next unless /^$branch\d+$/;
+            next if $self->{generation}{$_}{updated} > $args{time};
+            ($latest_time,$gen) = ($self->{generation}{$_}{updated}, $_)
+            if $self->{generation}{$_}{updated} > $latest_time;
+        }
+        return undef unless $latest_time;
     }
     return undef if $self->{generation} && !$self->{generation}{$gen};
     
     my $skip_to;
     my @out;
     for (@{$self->_contents}) {
-	if ($skip_to) {
-		if (/^=$skip_to$/) {
-		    undef $skip_to;
-		}
-		next;
-	}
-	if (my ($type,$gensel) = /^([+-])(.+)/) {
-		if (_is_parent_of($gensel,$gen) ^ ($type eq '+')) {
-		    $skip_to = $gensel;
-		}
-		next;
-	}
-	next if /^=/;
-	if (/^ /) {
-	    	push @out,substr($_,1);
-	}
+        if ($skip_to) {
+            if (/^=$skip_to$/) {
+                undef $skip_to;
+            }
+            next;
+        }
+        if (my ($type,$gensel) = /^([+-])(.+)/) {
+            if (_is_parent_of($gensel,$gen) ^ ($type eq '+')) {
+                $skip_to = $gensel;
+            }
+            next;
+        }
+        next if /^=/;
+
+        if (/^ /) {
+                push @out,substr($_,1);
+        }
     }
+
     my $file = $self->{path};
     VCS::Lite->new("$file\@\@$gen",undef,\@out);
 }
@@ -170,7 +176,9 @@ sub commit {
     my $chg = $self->fetch;
     my $before = VCS::Lite->new($updfile);
     return unless $before->delta($chg);
+    
     $self->_mumble("Committing $file to $parent");
+    
     my $out;
     open $out,'>',$updfile or croak "Failed to open $file for committing, $!";
     print $out $chg->text;
@@ -181,6 +189,7 @@ sub update {
 
     my $file = $self->path;
     $self->_mumble("Updating $file from $parent");
+    
     my ($vol,$dir,$fil) = splitpath($file);
     my $fromfile = catfile($parent,$fil);
     my $baseline = $self->{baseline} || 0;
@@ -198,8 +207,7 @@ sub update {
     my $out;
     open $out,'>',$file or croak "Failed to write back merge of $fil, $!";
     print $out $merged->text;
-    $self->_update_ctrl(baseline => $self->latest,
-		parent_baseline => $parlat);
+    $self->_update_ctrl(baseline => $self->latest, parent_baseline => $parlat);
 }
 
 sub _check_out_member {
@@ -231,39 +239,39 @@ sub _assimilate {
     my $genbase = $args{generation} || $self->latest;
 
     if (my $cont = $self->_contents) {
-	for (@$cont) {
-	    if ($skip_to) {
-		push @openers, $_;
-		if (/^=$skip_to$/) {
-		    undef $skip_to;
-		}
-		next;
-	    }
-	    if (my ($type,$gen) = /^([+-])(.+)/) {
-		$oldgen[-1][2] = [@closers] if @closers;
-		@closers = ();
-		push @openers, $_;
-		if (_is_parent_of($gen,$genbase) ^ ($type eq '+')) {
-		    $skip_to = $gen;
-		}
-		next;
-	    }
-	    if (my ($gen) = /^=(.+)/) {
-	    	push @closers, $_;
-	    	next;
-	    }
-	    if (/^ /) {
-		$oldgen[-1][2] = [@closers] if @closers;
-	    	push @oldgen,[$_, [@openers]];
-	    	@openers = @closers = ();
-	    	next;
-	    }
-	    croak "Invalid format in element contents";
-	}
-	$oldgen[-1][2] = [@closers] if @closers;
+        for (@$cont) {
+            if ($skip_to) {
+                push @openers, $_;
+                if (/^=$skip_to$/) {
+                    undef $skip_to;
+                }
+                next;
+            }
+            if (my ($type,$gen) = /^([+-])(.+)/) {
+                $oldgen[-1][2] = [@closers] if @closers;
+                @closers = ();
+                push @openers, $_;
+                if (_is_parent_of($gen,$genbase) ^ ($type eq '+')) {
+                    $skip_to = $gen;
+                }
+                next;
+            }
+            if (my ($gen) = /^=(.+)/) {
+                push @closers, $_;
+                next;
+            }
+            if (/^ /) {
+                $oldgen[-1][2] = [@closers] if @closers;
+                push @oldgen,[$_, [@openers]];
+                @openers = @closers = ();
+                next;
+            }
+            croak "Invalid format in element contents";
+        }
+        $oldgen[-1][2] = [@closers] if @closers;
     } else {
-	$self->_contents([map $_->[0], @newgen]);
-	return 1;
+        $self->_contents([map $_->[0], @newgen]);
+        return 1;
     }
 	
     $genbase =~ s/(\d+)$/$1+1/e;
@@ -271,37 +279,39 @@ sub _assimilate {
     my (@newcont,@pending);
     my $prev = 'u';
     my $changed = 0;
-    for (@sd) {
-	my ($ind,$c1,$c2) = @$_;
-	my @res1;
-	if ($c1) {
-	    @res1 = (@{$c1->[1]},$c1->[0]);
-	    push @res1,@{$c1->[2]} if defined $c1->[2];
-	}
-	my $res2 = $c2->[0] if $c2;
 
-	push @newcont,"=$genbase\n" if ($prev ne 'u') && ($ind ne $prev);
-	if (@pending && ($ind ne 'c')) {
-	    push @newcont, @pending, "=$genbase\n";
-	    @pending=();
-	}
-	if (($prev =~ /[u+]/) && ($ind =~ /[c-]/)) {
-	    push @newcont,"-$genbase\n";
-	    $changed++;
-	}
-	if ($ind eq '+') {
-	    push @newcont,"+$genbase\n" if ($prev ne $ind);
-	    push @newcont, $res2;
-	    $changed++;
-	} else {
-	    push @newcont, @res1;
-	}
-	if ($ind eq 'c') {
-	    push @pending,"+$genbase\n" if ($prev ne $ind);
-	    push @pending, $res2;
-	}
-	$prev = $ind;
+    for (@sd) {
+        my ($ind,$c1,$c2) = @$_;
+        my @res1;
+        if ($c1) {
+            @res1 = (@{$c1->[1]},$c1->[0]);
+            push @res1,@{$c1->[2]} if defined $c1->[2];
+        }
+        my $res2 = $c2->[0] if $c2;
+
+        push @newcont,"=$genbase\n" if ($prev ne 'u') && ($ind ne $prev);
+        if (@pending && ($ind ne 'c')) {
+            push @newcont, @pending, "=$genbase\n";
+            @pending=();
+        }
+        if (($prev =~ /[u+]/) && ($ind =~ /[c-]/)) {
+            push @newcont,"-$genbase\n";
+            $changed++;
+        }
+        if ($ind eq '+') {
+            push @newcont,"+$genbase\n" if ($prev ne $ind);
+            push @newcont, $res2;
+            $changed++;
+        } else {
+            push @newcont, @res1;
+        }
+        if ($ind eq 'c') {
+            push @pending,"+$genbase\n" if ($prev ne $ind);
+            push @pending, $res2;
+        }
+        $prev = $ind;
     }
+
     push @newcont,"=$genbase\n" if ($prev ne 'u');
     return undef unless $changed;
     $self->_contents(\@newcont);
@@ -314,9 +324,11 @@ sub _is_parent_of {
     my @g1v = split /\./,$gen1;
     my @g2v = split /\./,$gen2;
     (shift @g1v,shift @g2v) while @g1v && @g2v && ($g1v[0] eq $g2v[0]);
+    
     return 1 unless @g2v;
     return 0 unless @g1v;
     return 0 if @g1v > 1;
+    
     $g1v[0] < $g2v[0];
 }
 
