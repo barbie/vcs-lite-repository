@@ -39,7 +39,7 @@ sub new {
     my $pkg = shift;
     my $name = shift;
     my %args = validate ( @_, {
-    		   store => 0,		# Handled by SUPER::new
+               store => 0,      # Handled by SUPER::new
                    verbose => 0,
                    recordsize => { type => SCALAR, default => 128 },
                } );

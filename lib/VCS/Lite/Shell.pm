@@ -14,9 +14,9 @@ use Exporter ();
 #Give a hoot don't pollute, do not export more than needed by default
 @EXPORT      = qw ();
 @EXPORT_OK   = qw (store add remove list check_in check_out commit update fetch diff);
-%EXPORT_TAGS = ( 
+%EXPORT_TAGS = (
     local   => [qw/store add remove check_in fetch diff/],
-	all     => [qw/store add remove list check_in fetch diff check_out commit update/]
+    all     => [qw/store add remove list check_in fetch diff check_out commit update/]
 );
 
 use Params::Validate qw(:all);
@@ -41,22 +41,22 @@ sub store {
 }
 
 sub repository {
-    my ($store,$dir) = validate_pos( @_, 
-    	{ type => SCALAR | OBJECT},
-    	{ type => SCALAR, default => '.'} );
-    
+    my ($store,$dir) = validate_pos( @_,
+        { type => SCALAR | OBJECT},
+        { type => SCALAR, default => '.'} );
+
     store($store, VCS::Lite::Repository->default_store)
-    	unless exists $store_list{$store};
+        unless exists $store_list{$store};
     VCS::Lite::Repository->new( $dir, store=>$store_list{$store} );
 }
 
 sub member {
-    my ($st,$mem) = validate_pos( @_, 
-    	{ type => SCALAR | OBJECT},
-    	{ type => SCALAR, default => '.'} );
-    
+    my ($st,$mem) = validate_pos( @_,
+        { type => SCALAR | OBJECT},
+        { type => SCALAR, default => '.'} );
+
     store($st, VCS::Lite::Repository->default_store)
-    	unless exists $store_list{$st};
+        unless exists $store_list{$st};
     $store_list{$st}->retrieve($mem);
 }
 
@@ -74,8 +74,8 @@ sub remove {
 
 sub list {
     my %par = validate(@_, {
-    	recurse => 0} );
-    	
+        recurse => 0} );
+
     repository('current')->traverse( 'name', %par);
 }
 
@@ -92,25 +92,25 @@ sub diff {
     my %par = validate( @_, {
         file1 => { type => SCALAR },
         gen1 => { type => SCALAR,
-        	optional => 1,
-        	regex => qr/^\d+$/
-        	},
+            optional => 1,
+            regex => qr/^\d+$/
+            },
         file2 => { type => SCALAR,
-        	optional => 1,
-        	},
+            optional => 1,
+            },
         gen2 => { type => SCALAR,
-        	optional => 1,
-        	regex => qr/^\d+$|^latest$/
-        	},
+            optional => 1,
+            regex => qr/^\d+$|^latest$/
+            },
         } );
 
     my $lite1 = member('current',$par{file1})
-    	->fetch(exists($par{gen1}) ? (generation => $par{gen1}) : ());
+        ->fetch(exists($par{gen1}) ? (generation => $par{gen1}) : ());
     my $lite2;
     $par{file2} ||= $par{file1};
     if (exists $par{gen2}) {
         $lite2 = member('current',$par{file2})
-    	  ->fetch(($par{gen1} eq 'latest') ? () : (generation => $par{gen2}));
+          ->fetch(($par{gen1} eq 'latest') ? () : (generation => $par{gen2}));
     } else {
         $lite2 = VCS::Lite->new($par{file2});
     }
@@ -121,12 +121,12 @@ sub diff {
 
 sub check_out {
     my $parent_path = shift;
-    
+
     store('current', VCS::Lite::Repository->default_store)
-    	unless exists $store_list{current};
+        unless exists $store_list{current};
 
     repository('parent',$parent_path)
-    	->check_out( cwd(), store => $store_list{current} );
+        ->check_out( cwd(), store => $store_list{current} );
 }
 
 sub check_in {
@@ -155,7 +155,7 @@ VCS::Lite::Shell - Non OO wrapper for VCS::Lite::Repository
 =head1 SYNOPSIS
 
   use VCS::Lite::Shell;
-  
+
   store('current' => 'YAML');
   store('parent' => 'YAML');
   check_out('../parent_dir');
@@ -175,7 +175,7 @@ The module retains a context of the current repository store and current
 working directory. Move around with chdir, and the subroutines will operate
 on the current working directory and the contents thereof.
 
-The functions check_out, commit and update operate on a pair of repository 
+The functions check_out, commit and update operate on a pair of repository
 trees: the current repository and parent repository.
 
 =head2 add
@@ -205,7 +205,7 @@ If the contents of the file is different from what was in the store already,
 a new generation of the element is created; if the contents is identical, no
 new generation is created.
 
-Checking in a repository has two effects: any transactions to the repository, 
+Checking in a repository has two effects: any transactions to the repository,
 i.e. adds and removes, are committed to the repository's transaction history,
 and the check_in is applied recursively to everything (now) in the repository.
 
@@ -225,7 +225,7 @@ parameter is the generation number, which defaults to the latest one.
 
 Diff returns the udiff output (similar to diff -u) between two generations,
 or between a generation and the file outside. The parameter file1 is
-mandatory, all others are optional. The parameter file2 defaults to the 
+mandatory, all others are optional. The parameter file2 defaults to the
 value of file1; gen1 defaults to the latest generation of file1.
 
 If no gen2 is specified, diff uses the file file2 outside the repository
@@ -241,7 +241,7 @@ perl(1).
 There are no known bugs at the time of this release. However, if you spot a
 bug or are experiencing difficulties that are not explained within the POD
 documentation, please send an email to barbie@cpan.org or submit a bug to the
-RT system (see link below). However, it would help greatly if you are able to 
+RT system (see link below). However, it would help greatly if you are able to
 pinpoint problems or even supply a patch.
 
 http://rt.cpan.org/Public/Dist/Display.html?Name=VCS-Lite-Repository

@@ -22,10 +22,10 @@ sub new {
     my $pkg = shift;
     my $file = shift;
     my %args = validate ( @_, {
-    		   store => {
-    			type => SCALAR | OBJECT,
-    			default => $pkg->default_store,
-    			},
+               store => {
+                type => SCALAR | OBJECT,
+                default => $pkg->default_store,
+                },
                    verbose => 0,
                    recordsize => 0, #ignored unless VCS::Lite::Element::Binary
                } );
@@ -38,20 +38,20 @@ sub new {
         $store_pkg = $args{store};
     } else {
         $store_pkg = ($args{store} =~ /\:\:/) ? $args{store} : "VCS::Lite::Store::$args{store}";
-        eval "require $store_pkg"; 
+        eval "require $store_pkg";
         warn "Failed to require $store_pkg\n$@" if $@;
     }
 
     my $ele = $store_pkg->retrieve($file);
     if ($ele) {
         $ele->path($file);
-    	return $ele;
+        return $ele;
     }
-    
+
     my $proto = bless {
-        %args, 
-    	path => $file,
-	}, $pkg;
+        %args,
+        path => $file,
+    }, $pkg;
 
     $ele = $store_pkg->retrieve_or_create($proto);
 
@@ -64,12 +64,12 @@ sub new {
         }
         $lite = $ele->_slurp_lite($file);
     } else {
-    	$file = $lite->id;	# Not handled at present
+        $file = $lite->id;  # Not handled at present
     }
-    
+
     $ele->_assimilate($lite);
     $ele->save;
- 
+
     $ele->{verbose} = $verbose;
     $ele;
 }
@@ -91,9 +91,9 @@ sub check_in {
     $self->{generation} ||= {};
     my %gen = %{$self->{generation}};
     $gen{$newgen} = {
-    	author => $self->user,
-    	description => $args{description},
-	    updated => localtime->datetime,
+        author => $self->user,
+        description => $args{description},
+        updated => localtime->datetime,
     };
 
     $self->{latest} ||= {};
@@ -101,7 +101,7 @@ sub check_in {
     $newgen =~ /(\d+\.)*\d+$/;
     my $base = $1 || '';
     $lat{$base}=$newgen;
-    
+
     $self->_update_ctrl( generation => \%gen, latest => \%lat);
     $newgen;
 }
@@ -127,7 +127,7 @@ sub fetch {
                } );
 
     my $gen = $args{generation} || $self->latest;
-    
+
     if ($args{time}) {
         my $latest_time = '';
         my $branch = $args{generation} || '';
@@ -141,7 +141,7 @@ sub fetch {
         return undef unless $latest_time;
     }
     return undef if $self->{generation} && !$self->{generation}{$gen};
-    
+
     my $skip_to;
     my @out;
     for (@{$self->_contents}) {
@@ -176,9 +176,9 @@ sub commit {
     my $chg = $self->fetch;
     my $before = VCS::Lite->new($updfile);
     return unless $before->delta($chg);
-    
+
     $self->_mumble("Committing $file to $parent");
-    
+
     my $out;
     open $out,'>',$updfile or croak "Failed to open $file for committing, $!";
     print $out $chg->text;
@@ -189,7 +189,7 @@ sub update {
 
     my $file = $self->path;
     $self->_mumble("Updating $file from $parent");
-    
+
     my ($vol,$dir,$fil) = splitpath($file);
     my $fromfile = catfile($parent,$fil);
     my $baseline = $self->{baseline} || 0;
@@ -216,10 +216,10 @@ sub _check_out_member {
     my %args = validate(@_, {
                 store => { type => SCALAR|OBJECT, optional => 1 },
                 } );
-                                            
-    my $repos = VCS::Lite::Repository->new($newpath, 
-    	verbose => $self->{verbose},
-    	%args);
+
+    my $repos = VCS::Lite::Repository->new($newpath,
+        verbose => $self->{verbose},
+        %args);
     my ($vol,$dir,$fil) = splitpath($self->path);
     my $newfil = catfile($newpath,$fil);
     my $out;
@@ -273,7 +273,7 @@ sub _assimilate {
         $self->_contents([map $_->[0], @newgen]);
         return 1;
     }
-	
+
     $genbase =~ s/(\d+)$/$1+1/e;
     my @sd = Algorithm::Diff::sdiff( \@oldgen, \@newgen, sub { $_[0][0] });
     my (@newcont,@pending);
@@ -324,11 +324,11 @@ sub _is_parent_of {
     my @g1v = split /\./,$gen1;
     my @g2v = split /\./,$gen2;
     (shift @g1v,shift @g2v) while @g1v && @g2v && ($g1v[0] eq $g2v[0]);
-    
+
     return 1 unless @g2v;
     return 0 unless @g1v;
     return 0 if @g1v > 1;
-    
+
     $g1v[0] < $g2v[0];
 }
 
@@ -430,7 +430,7 @@ L<VCS::Lite::Repository>, L<VCS::Lite>.
 There are no known bugs at the time of this release. However, if you spot a
 bug or are experiencing difficulties that are not explained within the POD
 documentation, please send an email to barbie@cpan.org or submit a bug to the
-RT system (see link below). However, it would help greatly if you are able to 
+RT system (see link below). However, it would help greatly if you are able to
 pinpoint problems or even supply a patch.
 
 http://rt.cpan.org/Public/Dist/Display.html?Name=VCS-Lite-Repository

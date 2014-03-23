@@ -20,7 +20,7 @@ sub path {
     return $self->{path} unless @_;
 
     my $newpath = shift;
-    
+
     if ($self->{path} ne $newpath) {
         $self->{path} = $newpath;
         $self->save;
@@ -95,7 +95,7 @@ __END__
 There are no known bugs at the time of this release. However, if you spot a
 bug or are experiencing difficulties that are not explained within the POD
 documentation, please send an email to barbie@cpan.org or submit a bug to the
-RT system (see link below). However, it would help greatly if you are able to 
+RT system (see link below). However, it would help greatly if you are able to
 pinpoint problems or even supply a patch.
 
 http://rt.cpan.org/Public/Dist/Display.html?Name=VCS-Lite-Repository
