@@ -1,6 +1,7 @@
 Revision history for VCS::Lite::Repository
 ==========================================
 
+0.10    2014-04-08
         - change file dates changed to meet W3CDTF standards.
         - new maintainer, Barbie, due to the untimely death of Ivor Williams.
         - License updated to Artistic License v2.0.
@@ -8,6 +9,7 @@ Revision history for VCS::Lite::Repository
 	    - added minimum perl version (5.006).
         - added LICENSE & META.json files.
         - updated META files.
+        - updated test suite.
 
 0.09    2004-12-12T11:01:25
         - Fix failing tests. Don't autovivity $parent-{transactions} in 

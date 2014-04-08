@@ -4,7 +4,7 @@ use 5.006;
 use strict;
 use warnings;
 
-our $VERSION = '0.09';
+our $VERSION = '0.10';
 
 #----------------------------------------------------------------------------
 
@@ -261,9 +261,10 @@ sub commit {
     my $repos_name = (splitdir($self->path))[-1];
     my $parent_repos_path = $self->{parent} || catdir($parent,$repos_name);
     $self->_mumble("Committing $path to $parent_repos_path");
-    my $parent_repos = VCS::Lite::Repository->new($parent_repos_path,
-            verbose => $self->{verbose},
-            store => $self->{parent_store});
+    my $parent_repos = VCS::Lite::Repository->new(
+        $parent_repos_path,
+        verbose     => $self->{verbose},
+        store       => $self->{parent_store} || $self->{store});
 
     my $orig = VCS::Lite->new($repos_name,undef,$parent_repos->{contents});
     my $changed = VCS::Lite->new($repos_name,undef,$self->{contents});

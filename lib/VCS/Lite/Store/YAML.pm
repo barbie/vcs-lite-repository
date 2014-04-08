@@ -3,12 +3,12 @@ package VCS::Lite::Store::YAML;
 use strict;
 use warnings;
 
-our $VERSION = '0.09';
+our $VERSION = '0.10';
 
 #----------------------------------------------------------------------------
 
 use base qw(VCS::Lite::Store);
-use YAML qw(:all);
+use YAML qw(LoadFile DumpFile);
 
 #----------------------------------------------------------------------------
 
