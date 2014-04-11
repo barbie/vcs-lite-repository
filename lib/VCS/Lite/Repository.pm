@@ -151,15 +151,16 @@ sub remove {
 sub contents {
     my $self = shift;
 
-    map {my $file = catfile($self->{path},$_);
-    (-d $file) 
-        ? VCS::Lite::Repository->new($file,
-            verbose => $self->{verbose},
-            store => $self->{store})
-        : VCS::Lite::Element->new($file,
-            verbose => $self->{verbose},
-            store => $self->{store});}
-        @{$self->{contents}};
+    map {
+        my $file = catfile($self->{path},$_);
+        (-d $file) 
+            ? VCS::Lite::Repository->new($file,
+                verbose => $self->{verbose},
+                store => $self->{store})
+            : VCS::Lite::Element->new($file,
+                verbose => $self->{verbose},
+                store => $self->{store});
+        } @{$self->{contents}};
 }
 
 sub elements {
@@ -555,6 +556,30 @@ This method is used to propagate a change from a repository to its parent.
 
 This method applies changes that have happened to the parent, to the
 repository. This will merge with any changes in the current repository.
+
+=head2 repositories
+
+Return the currently available repositories.
+
+=head2 add_repository
+
+Add a repository to the current parent.
+
+=head2 elements
+
+Return the list of elements in the current repository.
+
+=head2 add_element
+
+Add an element to the current repository.
+
+=head2 contents
+
+Returns the full contents of the current repository, as objects.
+
+=head2 fetch
+
+Returns the VCS object for a given generation, or the latest generation.
 
 =head1 ENVIRONMENT VARIABLES
 

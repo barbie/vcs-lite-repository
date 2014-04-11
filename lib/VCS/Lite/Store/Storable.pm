@@ -44,6 +44,20 @@ VCS::Lite::Store::Storable - Minimal Version Control System - Storable backend
 
 =head1 METHODS
 
+See L<VCS::Lite::Store> for the list of object methods available.
+
+=head2 load
+
+Loads the given repository.
+
+=head2 save
+
+Saves the current repository.
+
+=head2 repos_name
+
+Returns the name of the current repository.
+
 =head1 BUGS, PATCHES & FIXES
 
 There are no known bugs at the time of this release. However, if you spot a

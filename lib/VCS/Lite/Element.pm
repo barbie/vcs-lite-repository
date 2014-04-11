@@ -401,6 +401,14 @@ generations.
 Constructs a VCS::Lite::Element for a given element in a repository.
 Returns undef if the element is not found in the repository.
 
+=head2 repository
+
+Create a repository object from the current path.
+
+=head2 traverse
+
+Does nothing currently.
+
 =head2 fetch
 
   my $lit=$ele->fetch( generation => 2);

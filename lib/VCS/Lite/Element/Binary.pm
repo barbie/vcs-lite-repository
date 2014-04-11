@@ -103,9 +103,7 @@ binary files
 
 See L<VCS::Lite::Element> for the list of object methods available.
 
-=over 4
-
-=item B<new>
+=head2 new
 
   my $obj = VCS::Lite::Element::Binary->new( $filename, [param => value...]);
 
