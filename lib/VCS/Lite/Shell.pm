@@ -89,18 +89,22 @@ sub fetch {
 }
 
 sub diff {
-    my %par = validate( @_, {
-        file1 => { type => SCALAR },
-        gen1 => { type => SCALAR,
-            optional => 1,
-            regex => qr/^\d+$/
+    my %par = validate( @_, 
+        {
+            file1 => { type => SCALAR },
+            gen1 => { 
+                type => SCALAR,
+                optional => 1,
+                regex => qr/^\d+$/
             },
-        file2 => { type => SCALAR,
-            optional => 1,
+            file2 => { 
+                type => SCALAR,
+                optional => 1,
             },
-        gen2 => { type => SCALAR,
-            optional => 1,
-            regex => qr/^\d+$|^latest$/
+            gen2 => { 
+                type => SCALAR,
+                optional => 1,
+                regex => qr/^\d+$|^latest$/
             },
         } );
 
@@ -147,6 +151,7 @@ sub update {
 
 __END__
 
+#----------------------------------------------------------------------------
 
 =head1 NAME
 
@@ -177,6 +182,8 @@ on the current working directory and the contents thereof.
 
 The functions check_out, commit and update operate on a pair of repository
 trees: the current repository and parent repository.
+
+=head1 METHODS
 
 =head2 add
 

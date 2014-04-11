@@ -36,6 +36,14 @@ sub repos_name {
 
 __END__
 
+#----------------------------------------------------------------------------
+
+=head1 NAME
+
+VCS::Lite::Store::YAML - Minimal Version Control System - YAML backend
+
+=head1 METHODS
+
 =head1 BUGS, PATCHES & FIXES
 
 There are no known bugs at the time of this release. However, if you spot a
