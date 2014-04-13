@@ -3,7 +3,7 @@ package VCS::Lite::Shell;
 use strict;
 use warnings;
 
-our $VERSION = '0.10';
+our $VERSION = '0.11';
 
 #----------------------------------------------------------------------------
 
