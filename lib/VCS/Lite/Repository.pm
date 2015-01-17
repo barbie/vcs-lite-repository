@@ -624,12 +624,12 @@ be forthcoming, please feel free to (politely) remind me.
 =head1 AUTHOR
 
   Original Author: Ivor Williams (RIP)          2002-2009
-  Current Maintainer: Barbie <barbie@cpan.org>  2014
+  Current Maintainer: Barbie <barbie@cpan.org>  2014-2015
 
 =head1 COPYRIGHT
 
   Copyright (c) Ivor Williams, 2002-2009
-  Copyright (c) Barbie,        2014
+  Copyright (c) Barbie,        2014-2015
 
 =head1 LICENCE
 
