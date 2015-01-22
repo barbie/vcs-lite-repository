@@ -1,6 +1,7 @@
 Revision history for VCS::Lite::Repository
 ==========================================
 
+0.12    2015-01-22
         - fixed license fields in META.json to be lists.
         - extended META test suite.
         - added resources list to META.yml.
